@@ -1,26 +1,36 @@
-# GUI – File Restriction (File Jail)
+# GUI – File Restriction (Native PySide6 Panel)
 
-This document describes the File Jail panel UI, API contract, and test steps for the GUI Task A implementation.
+This document describes the native (PySide6) File Jail panel introduced for Phase 3 Task A.
 
-UI (File: `src/components/FileJailPanel.jsx`)
-- Checkbox: Enable File Jail (default: unchecked)
-- Text field: Jail path (default: `sandbox_jail`)
-- Checkbox: Enforce (requires sudo) — shows sudo command but does not run it
-- Text field: Command to run (default: `./tests/infinite_loop`)
-- Buttons: Prepare Jail, Apply & Run
-- Status area: last run status and optional sudo command
+## Locations
+- Panel logic: `gui/file_jail_panel.py`
+- Integration point: `zencube/zencube_modern_gui.py` (calls `attach_file_jail_panel` inside the command/limits column)
 
-API
-- POST `/api/sandbox/prepare_jail` — Body: `{ "jailPath": "<path>" }`.
-  - Runs `scripts/build_jail_dev.sh <path>` synchronously and returns `{status, rc, stdout, stderr}`.
+## UI Elements
+- Checkbox: **Enable File Jail** (default unchecked; disables other controls when false)
+- Text field + browse button: **Jail path** (defaults to `sandbox_jail`)
+- Checkbox: **Enforce (requires sudo)** – displays the exact `sudo` command and aborts execution when non-root
+- Button: **Prepare Jail** – runs `scripts/build_jail_dev.sh <path>` in a worker thread and streams output to the status box
+- Button: **Apply & Run** – launches `python3 monitor/jail_wrapper.py --jail <path> -- <command...>` asynchronously and shows wrapper output
+- Status area: read-only log of progress plus a hyperlink to the most recent `monitor/logs/gui_run_*.json`
 
-- POST `/api/sandbox/run` — Body: `{ "command", "jailPath", "useJail", "enforce" }`.
-  - Validates inputs. If `useJail && !jailPath` or `jailPath == '/'` returns 400.
-  - If `enforce == true` and server is not root, returns `{status: "need_sudo", sudo_command: "..."}`.
-  - Dev-mode: spawns `monitor/jail_wrapper.py` asynchronously and returns `{status: "ok", runId, log}` where `log` is the path to a JSON log in `monitor/logs/`.
+## Behaviour & Safety
+- Dev-safe by default: all commands run through `monitor/jail_wrapper.py` using the active Python interpreter.
+- Input validation: jail path must be non-empty and cannot be `/`.
+- Enforce mode never executes privileged commands; it only surfaces a copyable `sudo` command.
+- Wrapper output is streamed live and the most recent log is parsed for a short summary (method, exit code, violations count).
 
-Test
-- See `tests/test_gui_file_jail.sh` — requires server running at `http://127.0.0.1:8000`.
+## Testing
+- Script: `tests/test_gui_file_jail_py.sh`
+  - Runs headlessly with `QT_QPA_PLATFORM=offscreen`.
+  - Instantiates `FileJailPanel`, prepares a test jail, triggers a run, and verifies that a log file is generated and references the chosen jail path.
+- Run manually from repository root:
 
-Safety
-- The GUI never executes sudo. When enforcement is required the UI displays the required `sudo` command to the user. Do not run privileged commands via the UI.
+```bash
+./tests/test_gui_file_jail_py.sh
+```
+
+## Notes
+- The panel expects the rest of the GUI to supply command/argument inputs (`ZenCubeModernGUI.command_input` and `.args_input`).
+- Log directory (`monitor/logs/`) is created on import so that runs on clean workspaces succeed without manual setup.
+- For production, replace the wrapper invocation with the privileged `sudo` command surfaced to the user.

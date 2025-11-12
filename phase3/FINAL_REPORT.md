@@ -20,13 +20,13 @@
 - Additional filesystem-hardening goals listed in the master checklist remain open (mount namespaces, read-only mounts, etc.) and are out of scope for this task.
 
 ## Artefacts
-- Code: `zencube/sandbox.c`, `monitor/jail_wrapper.py`
-- Scripts: `scripts/build_jail_dev.sh`, `tests/test_jail_dev.sh`
-- Documentation & Logs: `phase3/NOTES.md`, `phase3/TEST_RUNS.md`, `phase3/SCORES.md`, `monitor/logs/jail_run_*.json`
+- Code: `zencube/sandbox.c`, `monitor/jail_wrapper.py`, `gui/file_jail_panel.py`, `zencube/zencube_modern_gui.py`
+- Scripts: `scripts/build_jail_dev.sh`, `tests/test_jail_dev.sh`, `tests/test_gui_file_jail_py.sh`
+- Documentation & Logs: `docs/GUI_FILE_JAIL.md`, `phase3/NOTES.md`, `phase3/TEST_RUNS.md`, `phase3/SCORES.md`, `monitor/logs/jail_run_*.json`
 
 ## GUI Work (in-progress)
 
-- Added API stubs under `server/api/sandbox.py` to support `prepare_jail` and `run` endpoints for the GUI.
-- Added a React component placeholder at `src/components/FileJailPanel.jsx` implementing the UI and safety behavior for the File Restriction panel.
-- Added an integration test script `tests/test_gui_file_jail.sh` (requires the API server to be running) and `docs/GUI_FILE_JAIL.md` describing usage.
+- Replaced the experimental web JSX component with a native PySide6 panel (`gui/file_jail_panel.py`) that plugs into `zencube_modern_gui.py`.
+- The panel exposes Enable/Enforce toggles, jail path picker, and Prepare/Run actions that execute the existing dev-safe scripts in background threads.
+- Added a headless regression test `tests/test_gui_file_jail_py.sh` to exercise the panel logic without launching a full GUI and refreshed `docs/GUI_FILE_JAIL.md` accordingly.
 
