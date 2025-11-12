@@ -33,3 +33,4 @@
 - [2025-11-12 11:43 UTC] READ: phase3/SCORES.md — Score table logging File System Restriction task outcome.
 - [2025-11-12 11:44 UTC] READ: phase3/TEST_RUNS.md — Test run log capturing dev wrapper validation pass details.
 - [2025-11-12 11:45 UTC] READ: .github/copilot-instructions.md — (empty file)
+- [2025-11-12 12:00 UTC] READ: docs/GUI_FILE_JAIL.md — Summary of GUI panel UI, API interactions, safety guidance.
