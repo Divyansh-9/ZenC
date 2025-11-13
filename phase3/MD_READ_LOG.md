@@ -58,4 +58,7 @@
 - [2025-11-13 03:41 UTC] READ: MODERN_GUI_DOCUMENTATION.md — Reviewed modern GUI architecture to embed charts without breaking styling.
 - [2025-11-13 03:42 UTC] READ: RESPONSIVE_FEATURES.md — Ensured new controls honor existing responsive layout expectations.
 - [2025-11-13 03:43 UTC] READ: CROSS_PLATFORM_SUPPORT.md — Confirmed WSL/native handling considerations for exporter and rotation commands.
+- [2025-11-13 15:18 UTC] READ: README.md — Refreshed project feature set and roadmap before launching Phase 4 ML work.
+- [2025-11-13 15:19 UTC] READ: docs/PROJECT_OVERVIEW.md — Revisited system architecture to map telemetry sources for ML pipeline planning.
+- [2025-11-13 15:20 UTC] READ: docs/ROLE_3_INTEGRATION.md — Reviewed integration layer duties to align upcoming ML ingestion with GUI and sandbox bridge.
 
