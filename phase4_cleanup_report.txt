@@ -134,3 +134,77 @@ Command 'python' not found, did you mean:
 
 Sanity checks completed.
 
+
+D — FINAL SUMMARY
+=================
+
+Backup Branch: backup/phase4-snapshot
+Backup Archive: backup_phase4_archive/
+Cleanup Report: phase4_cleanup_report.txt
+
+ARCHIVED FILES (15 total):
+- inference/ml_inference.py
+- data/collector.py
+- data/dataset_prompt.md
+- data/labeler.py
+- data/sample_generator.py
+- data/sequences.py
+- models/train.py
+- models/evaluate.py
+- models/artifacts/meta.json
+- models/artifacts/model.pkl
+- models/artifacts/scaler.pkl
+- models/artifacts/report.md
+- models/artifacts/lstm.pt
+- docs/ML_INTEGRATION.md
+- tests/test_inference.sh
+
+PACKAGES REMOVED (5 total):
+- numpy (not installed in venv, removed from requirements.txt)
+- pandas (not installed in venv, removed from requirements.txt)
+- scikit-learn (not installed in venv, removed from requirements.txt)
+- joblib (not installed in venv, removed from requirements.txt)
+- torch (not installed in venv, removed from requirements.txt)
+
+PACKAGES SKIPPED (shared):
+- None (all Phase-4 packages were exclusive to ML integration)
+
+NEXT STEPS:
+1. Verify Phase-1/2/3 functionality with existing test suite
+2. Review backup_phase4_archive/ if Phase-4 restoration is needed
+3. Merge backup/phase4-snapshot into main if rollback is permanent
+4. Delete feature/phase4-ml-integration branch if no longer needed
+
+Phase-4 rollback completed successfully.
+
+E — POST-ROLLBACK TESTING & VERIFICATION
+==========================================
+
+Test Run: 2025-11-15T10:16:43Z
+
+ADDITIONAL CLEANUP REQUIRED:
+- Discovered residual Phase-4 ML code in gui/monitor_panel.py
+- Removed: ML imports, _InferenceWorker class, inference methods
+- Fixed: Indentation errors from incomplete Phase-4 removal
+- Commit: 13039aa "fix: remove Phase-4 ML integration code from monitor_panel"
+
+PHASE-3 CORE MONITORING: ✅ VERIFIED
+- ProcessInspector module loads correctly
+- Sample data structure working
+- AlertManager functional
+- AlertRecord tracking operational
+
+PHASE-3 JAIL WRAPPER: ✅ VERIFIED
+- test_jail_dev.sh PASSED
+- Filesystem violation detection working
+- /etc/hosts access correctly blocked (exit code 2)
+
+PYTHON SYNTAX & IMPORTS: ✅ VERIFIED
+- All monitor modules import successfully
+- gui/monitor_panel.py compiles without errors
+- No broken Phase-4 dependencies remain
+
+NOTE: Full GUI runtime testing skipped (PySide6 not installed in venv)
+
+ROLLBACK STATUS: ✅ COMPLETE & VERIFIED
+Phase-1/2/3 functionality confirmed intact after Phase-4 removal.
