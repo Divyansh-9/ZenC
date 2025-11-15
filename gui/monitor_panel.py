@@ -40,7 +40,6 @@ from monitor.resource_monitor import (
     format_command,
     iso_timestamp,
 )
-from inference.ml_inference import MLInferenceEngine, PredictionResult
 
 _DEFAULT_WINDOW = 60
 _WINDOW_CHOICES = (30, 60, 120)
@@ -163,26 +162,6 @@ class _MonitorWorker(QThread):
         }
         append_json_line(self._log_path, summary)
         self.summary_ready.emit(summary, str(self._log_path))
-
-
-class _InferenceWorker(QThread):
-    """Run ML inference off the Qt thread and emit results."""
-
-    inference_ready = Signal(object)
-    failed = Signal(str)
-
-    def __init__(self, log_path: str, artifact_dir: str | None = None, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-        self._log_path = log_path
-        self._artifact_dir = artifact_dir
-
-    def run(self) -> None:
-        try:
-            engine = MLInferenceEngine(self._artifact_dir) if self._artifact_dir else MLInferenceEngine()
-            res = engine.predict_run(self._log_path)
-            self.inference_ready.emit(res)
-        except Exception as exc:
-            self.failed.emit(str(exc))
 
 
 class _AlertDialog(QDialog):
@@ -319,10 +298,6 @@ class MonitoringPanel(QWidget):
         self.rotate_btn = QPushButton("Rotate Logs")
         control_row.addWidget(self.rotate_btn, 2, 1)
 
-    self.ml_btn = QPushButton("Run ML Inference")
-    self.ml_btn.setToolTip("Run ML inference on the latest captured run and show explanation")
-    control_row.addWidget(self.ml_btn, 2, 3)
-
         self.alert_btn = QPushButton("Alerts (0)")
         self.alert_btn.setStyleSheet(
             "QPushButton { background: #edf2f7; color: #2d3748; border-radius: 6px; padding: 6px 12px; }"
@@ -392,9 +367,8 @@ class MonitoringPanel(QWidget):
         self.window_combo.currentIndexChanged.connect(self._on_window_changed)
         self.alpha_spin.valueChanged.connect(self._on_alpha_changed)
         self.pause_btn.clicked.connect(self._toggle_pause)
-    self.rotate_btn.clicked.connect(self._handle_rotate_clicked)
-    self.ml_btn.clicked.connect(self._on_run_inference_clicked)
-    self.alert_btn.clicked.connect(self._show_alerts)
+        self.rotate_btn.clicked.connect(self._handle_rotate_clicked)
+        self.alert_btn.clicked.connect(self._show_alerts)
 
     def is_enabled(self) -> bool:
         return self.enable_check.isChecked()
@@ -563,31 +537,6 @@ class MonitoringPanel(QWidget):
             self._update_chart_visuals()
         if self._prom_exporter.is_enabled() and self._current_run_id:
             self._prom_exporter.record_sample(self._current_run_id, sample)
-
-    def _on_run_inference_clicked(self) -> None:
-        log = self._latest_log_path
-        if not log:
-            self._log("No run log available for inference.", "warning")
-            return
-        # run inference off the UI thread
-        worker = _InferenceWorker(log, parent=self)
-        worker.inference_ready.connect(self._on_inference_ready)
-        worker.failed.connect(self._on_inference_failed)
-        worker.start()
-
-    def _on_inference_ready(self, result: object) -> None:
-        try:
-            # accept either PredictionResult or dict
-            doc = result.to_dict() if hasattr(result, "to_dict") else dict(result)
-        except Exception:
-            doc = {"error": "invalid result"}
-        pretty = json.dumps(doc, indent=2)
-        self.sample_view.append("\n=== ML Inference Result ===\n")
-        self.sample_view.append(pretty)
-        self._log("ML inference completed. See recent log view.", "info")
-
-    def _on_inference_failed(self, message: str) -> None:
-        self._log(f"ML inference failed: {message}", "error")
 
     def _update_alert_badge(self) -> None:
         count = self._alert_manager.alert_count()
