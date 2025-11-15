@@ -1,0 +1,39 @@
+{
+  "seed": 2025,
+  "dataset_score": 10.0,
+  "dataset_metrics": {
+    "variance_mean": 1.053931804486395e+16,
+    "balance_ratio": 0.5416666666666666,
+    "time_std": 23.075655618115352,
+    "anomaly_ratio": 0.4262295081967213,
+    "rare_total": 18.0,
+    "sample_count": 61.0
+  },
+  "dataset_class_counts": {
+    "unknown": 13,
+    "benign": 24,
+    "malicious": 24
+  },
+  "model_score": 9.376741974262284,
+  "model_f1_macro": 0.8412698412698413,
+  "model_accuracy": 0.88,
+  "lstm_score": null,
+  "feature_columns": [
+    "cpu_mean",
+    "cpu_max",
+    "cpu_std",
+    "cpu_slope",
+    "rss_mean",
+    "rss_max",
+    "rss_std",
+    "rss_slope",
+    "io_read_rate",
+    "io_write_rate",
+    "open_files_mean",
+    "socket_count_mean",
+    "time_above_cpu_50",
+    "violation_count",
+    "duration_seconds",
+    "threads_mean"
+  ]
+}

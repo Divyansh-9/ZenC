@@ -12,3 +12,4 @@
 | 2025-11-13T12:46:42Z | `bash tests/test_log_rotate.sh` | PASS – rotate_logs archived 5 files and retained 10 JSONL logs |
 | 2025-11-13T12:47:15Z | `bash tests/test_prom_exporter.sh` | PASS – Prometheus endpoint exposed metrics for `test-run` |
 
+| 2025-11-15T00:00:00Z | `/home/Idred/Downloads/ZenCube/.venv/bin/python models/train.py --quick --no-lstm` | PASS – Dataset score: 10.0, Baseline model score: 9.3767; artifacts written to `models/artifacts` |

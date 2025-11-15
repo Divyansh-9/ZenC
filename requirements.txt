@@ -7,6 +7,13 @@ psutil>=5.9.0
 matplotlib>=3.7.0
 prometheus-client>=0.17.0
 
+# Phase 4 ML Integration
+numpy>=1.26.0
+pandas>=2.1.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+torch>=2.1.0
+
 # Legacy GUI (Optional - for backwards compatibility)
 # tkinter is included with most Python installations
 # If tkinter is not installed, install it separately:

@@ -61,4 +61,15 @@
 - [2025-11-13 15:18 UTC] READ: README.md — Refreshed project feature set and roadmap before launching Phase 4 ML work.
 - [2025-11-13 15:19 UTC] READ: docs/PROJECT_OVERVIEW.md — Revisited system architecture to map telemetry sources for ML pipeline planning.
 - [2025-11-13 15:20 UTC] READ: docs/ROLE_3_INTEGRATION.md — Reviewed integration layer duties to align upcoming ML ingestion with GUI and sandbox bridge.
+ - [2025-11-14 00:01 UTC] READ: docs/MONITORING_DASHBOARD.md - Monitoring dashboard: sampler behavior, JSONL artefacts, EWMA smoothing, alerts, log rotation, Prometheus exporter, and CI/testing hooks.
+ - [2025-11-14 00:02 UTC] READ: docs/GUI_FILE_JAIL.md - GUI File Jail panel: controls, dev-safe wrapper usage, prepare/apply flow, safety constraints, and headless test notes.
+ - [2025-11-14 00:03 UTC] READ: phase3/FINAL_REPORT.md - Phase 3 final report: chroot flag, jail wrapper, network restrictions, monitoring additions and artefacts summary.
+ - [2025-11-14 00:04 UTC] READ: phase3/SCORES.md - Phase 3 scoring table: task-level scores and timestamps for filesystem, GUI, network, and monitoring items.
+ - [2025-11-14 00:05 UTC] READ: phase3/TEST_RUNS.md - Phase 3 test runs log: timestamped PASS entries for jail, GUI file jail, network restrict, and monitoring regression tests.
+ - [2025-11-14 00:06 UTC] READ: phase3/NOTES.md - Developer notes: dev-safe jail wrapper details, strace vs /proc fallback, build_jail_dev script, and follow-up actions.
+ - [2025-11-14 00:07 UTC] READ: GUI_IMPLEMENTATION.md - GUI implementation overview: Tkinter-based legacy GUI, features, threading, subprocess management, and testing outcomes.
+ - [2025-11-14 00:08 UTC] READ: data/dataset_prompt.md - Generative dataset prompt: detailed synthetic telemetry schema and rules for producing balanced benign/malicious JSONL scenarios for Phase 4.
+
+ - [2025-11-15 00:00 UTC] GENERATED: monitor/logs/synth/ - Synthetic telemetry scenarios created via `data.sample_generator.generate_dataset` (seed=2025). Files written for malicious/benign/unknown scenarios.
+ - [2025-11-15 00:00 UTC] RAN: models/train.py --quick --no-lstm - Quick baseline training completed. Dataset score: 10.0; Baseline model score: 9.3767. Artifacts saved under `models/artifacts`.
 

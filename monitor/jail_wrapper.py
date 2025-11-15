@@ -17,11 +17,17 @@ import json
 import os
 import pathlib
 import re
+import signal
 import shutil
 import subprocess
 import sys
 import time
 from typing import Iterable, Sequence, Set
+
+try:
+    from monitor.ml_guard import MLGuard
+except Exception:  # pragma: no cover - guard optional
+    MLGuard = None  # type: ignore
 
 LOG_DIR = pathlib.Path(__file__).resolve().parent / "logs"
 ALLOWED_PREFIXES_STATIC: Sequence[str] = (
@@ -58,6 +64,17 @@ ALLOWED_USER_PREFIXES: Sequence[str] = (
     str(USER_HOME / ".cache"),
 )
 VIOLATION_EXIT_CODE = 2
+
+_GUARD_INSTANCE = None
+
+
+def _get_guard():
+    global _GUARD_INSTANCE
+    if MLGuard is None:
+        return None
+    if _GUARD_INSTANCE is None:
+        _GUARD_INSTANCE = MLGuard()
+    return _GUARD_INSTANCE
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
@@ -191,6 +208,10 @@ def run_command(args: argparse.Namespace) -> int:
         "violations": [],
     }
 
+    guard = _get_guard()
+    guard_run_id_base = f"wrapper-{timestamp}"
+    guard_run_id = None
+
     print(f"[jail-wrapper] Jail root: {jail_root}")
     print(f"[jail-wrapper] Command: {' '.join(args.cmd)}")
 
@@ -209,18 +230,35 @@ def run_command(args: argparse.Namespace) -> int:
             cwd=str(jail_root),
             env=os.environ.copy(),
         )
+        if guard is not None:
+            guard_run_id = f"{guard_run_id_base}-{proc.pid}"
+            try:
+                guard.watch(proc.pid, jail_root, args.cmd, run_id=guard_run_id)
+                print(f"[jail-wrapper] ML guard active (run {guard_run_id}).")
+            except Exception as guard_error:  # pragma: no cover - defensive degrade
+                print(f"[jail-wrapper] ML guard disabled: {guard_error}", file=sys.stderr)
+                guard_run_id = None
+                log_entry["ml_guard_active"] = False
     except FileNotFoundError as exc:
         print(f"[jail-wrapper] Error: {exc}", file=sys.stderr)
         return 127
 
-    if strace_log is not None:
-        return_code = proc.wait()
-        violations = parse_strace_log(strace_log, jail_root)
-    else:
-        violations = monitor_with_proc_fd(proc, jail_root)
-        return_code = proc.wait()
+    try:
+        if strace_log is not None:
+            return_code = proc.wait()
+            violations = parse_strace_log(strace_log, jail_root)
+        else:
+            violations = monitor_with_proc_fd(proc, jail_root)
+            return_code = proc.wait()
+    finally:
+        if guard is not None:
+            guard.stop(proc.pid)
+
     log_entry["command_exit_code"] = return_code
     log_entry["violations"] = sorted(violations)
+    log_entry["ml_guard_run_id"] = guard_run_id
+    log_entry["ml_guard_active"] = guard_run_id is not None
+    log_entry["ml_guard_terminated"] = guard_run_id is not None and return_code == -signal.SIGKILL
 
     if violations:
         print("[jail-wrapper] Detected filesystem violations:")

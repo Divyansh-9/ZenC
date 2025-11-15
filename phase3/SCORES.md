@@ -8,3 +8,7 @@
 | 2025-11-13T03:17:00Z | Monitoring & Dashboard (Task C) | 9.4 | Sampling monitor, PySide6 dashboard, JSONL artefacts, offscreen regression test, and documentation |
 | 2025-11-13T12:48:00Z | Monitoring enhancements (Phase 3) | 9.6 | Matplotlib charts with EWMA, alerts & log rotation, Prometheus exporter, CI workflow, and full regression suite |
 
+
+| 2025-11-15T00:00:00Z | Phase 4 – Dataset Quality (synthetic + real) | 10.0 | Dataset generator (data.sample_generator) produced balanced benign/malicious/unknown; diversity metrics passed |
+| 2025-11-15T00:00:00Z | Phase 4 – Baseline Model (RandomForest quick run) | 9.38 | Quick training produced RandomForest artifacts in `models/artifacts` (model.pkl, scaler.pkl); F1/accuracy acceptable |
+
