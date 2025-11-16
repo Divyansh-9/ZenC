@@ -77,3 +77,44 @@
  - [2025-11-15 12:07 UTC] RAN: models/evaluate.py --use-lstm - Verified baseline + LSTM performance summaries for logging.
 
 - [2025-11-15 10:04 UTC] ROLLBACK: Phase-4 ML Integration — Archived all Phase-4 files to backup_phase4_archive/ and uninstalled numpy, pandas, scikit-learn, joblib, torch from venv. Backup branch: backup/phase4-snapshot. Removed files: inference/ml_inference.py, data/{collector,labeler,sample_generator,sequences}.py, models/{train,evaluate}.py, models/artifacts/{meta.json,model.pkl,scaler.pkl,report.md,lstm.pt}, docs/ML_INTEGRATION.md, tests/test_inference.sh.
+
+---
+## Phase-3 Core C Reimplementation Analysis
+**Date**: 2025-11-16  
+**Branch**: feature/phase3-core-c
+
+### Python Module Analysis
+
+**resource_monitor.py** (246 lines):
+- Uses psutil for process sampling (CPU%, RSS, VMS, threads, open files, I/O)
+- Sample dataclass with to_dict() → JSONL event format
+- ProcessInspector class wraps psutil.Process
+- JSONL append functions with atomic writes
+- ISO timestamp generation
+- Key functions: collect_sample(), build_log_path(), format_command()
+
+**alert_manager.py** (224 lines):
+- AlertRecord dataclass with threshold metadata
+- Configurable thresholds (cpu_pct_high, rss_mb_high, duration_sec)
+- State tracking with threading.Lock for concurrent access
+- Alert deduplication and acknowledgment system
+- JSONL alert log output
+
+**log_rotate.py** (115 lines):
+- Keeps last N files (default 10)
+- Compression to .gz for old logs
+- Pattern matching for log file selection
+
+**prometheus_exporter.py** (112 lines):
+- Optional prometheus_client integration
+- Gauges: zencube_cpu_percent, zencube_rss_mb
+- HTTP server on port 9109
+- Thread-safe updates via Lock
+
+### C Implementation Requirements
+- /proc filesystem parsing (stat, status, fd/, io)
+- JSONL writing with cJSON library
+- Alert rule evaluation from JSON config
+- HTTP server for /metrics (lightweight, no heavy deps)
+- Signal handling (SIGINT, SIGTERM)
+- Atomic file operations
