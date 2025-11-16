@@ -516,12 +516,42 @@ class MonitoringPanel(QWidget):
                 self._log(f"Skipped (in use?): {entry}\n", "warning")
 
     def _on_sample(self, sample: Sample) -> None:
-        rss_mb = sample.memory_rss / _MB_DIVISOR
-        entry = (
-            f"{sample.timestamp} | CPU {sample.cpu_percent:.1f}% | RSS {rss_mb:.1f} MB | Threads {sample.threads}"
-        )
-        if sample.open_files is not None:
-            entry += f" | FDs {sample.open_files}"
+        # Defensive attribute access - support both 'memory_rss' and 'rss_bytes'
+        try:
+            rss_bytes = getattr(sample, 'memory_rss', None)
+            if rss_bytes is None:
+                rss_bytes = getattr(sample, 'rss_bytes', 0)
+            if rss_bytes is None:
+                rss_bytes = 0
+            
+            rss_mb = rss_bytes / _MB_DIVISOR
+            
+            # Defensive CPU access
+            cpu_percent = getattr(sample, 'cpu_percent', 0.0)
+            if cpu_percent is None:
+                cpu_percent = 0.0
+            
+            # Defensive timestamp access
+            timestamp = getattr(sample, 'timestamp', 'N/A')
+            
+            # Defensive threads access
+            threads = getattr(sample, 'threads', 0)
+            if threads is None:
+                threads = 0
+            
+            entry = (
+                f"{timestamp} | CPU {cpu_percent:.1f}% | RSS {rss_mb:.1f} MB | Threads {threads}"
+            )
+            
+            open_files = getattr(sample, 'open_files', None)
+            if open_files is not None:
+                entry += f" | FDs {open_files}"
+                
+        except Exception as exc:
+            # Log parsing errors but don't crash
+            self._log(f"Sample parsing error: {exc}\n", "error")
+            return
+        
         self._recent_samples.append(entry)
         self.sample_view.setPlainText("\n".join(self._recent_samples))
         self.sample_view.verticalScrollBar().setValue(self.sample_view.verticalScrollBar().maximum())
@@ -529,7 +559,7 @@ class MonitoringPanel(QWidget):
 
         self._sample_counter += 1
         self._sample_indices.append(self._sample_counter)
-        self._cpu_series.append(float(sample.cpu_percent))
+        self._cpu_series.append(float(cpu_percent))
         self._rss_series.append(rss_mb)
         self._process_alerts(sample)
         self._update_alert_badge()
