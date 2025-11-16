@@ -382,3 +382,18 @@ class FileJailPanel(QWidget):
             base.extend(command_parts)
         return " ".join(base)
 
+
+def attach_file_jail_panel(parent, layout):
+    """
+    Factory function to create and attach FileJailPanel to the parent layout.
+    
+    Args:
+        parent: Parent widget
+        layout: Layout to attach the panel to
+        
+    Returns:
+        FileJailPanel instance
+    """
+    panel = FileJailPanel(parent)
+    layout.addWidget(panel)
+    return panel
