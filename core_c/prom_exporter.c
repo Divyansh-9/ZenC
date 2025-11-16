@@ -66,6 +66,7 @@ static int read_latest_metrics(const char *log_path, PromMetrics *metrics) {
     // Read to last line
     while (fgets(line, sizeof(line), fp)) {
         strncpy(last_line, line, sizeof(last_line) - 1);
+        last_line[sizeof(last_line) - 1] = '\0';  // Ensure null termination
     }
     fclose(fp);
     
@@ -113,46 +114,48 @@ static char* generate_metrics_text(const PromMetrics *metrics) {
     
     int offset = 0;
     
-    // Helper macro
-    #define APPEND(fmt, ...) offset += snprintf(buffer + offset, BUFFER_SIZE - offset, fmt, ##__VA_ARGS__)
+    // Helper macro - avoid variadic macro warnings by using separate macros
+    #define APPEND_STR(str) offset += snprintf(buffer + offset, BUFFER_SIZE - offset, "%s", str)
+    #define APPEND_FMT(fmt, ...) offset += snprintf(buffer + offset, BUFFER_SIZE - offset, fmt, __VA_ARGS__)
     
-    APPEND("# HELP zencube_cpu_percent CPU usage percentage\n");
-    APPEND("# TYPE zencube_cpu_percent gauge\n");
-    APPEND("zencube_cpu_percent %.2f\n", metrics->cpu_percent);
+    APPEND_STR("# HELP zencube_cpu_percent CPU usage percentage\n");
+    APPEND_STR("# TYPE zencube_cpu_percent gauge\n");
+    APPEND_FMT("zencube_cpu_percent %.2f\n", metrics->cpu_percent);
     
-    APPEND("# HELP zencube_memory_rss_bytes RSS memory in bytes\n");
-    APPEND("# TYPE zencube_memory_rss_bytes gauge\n");
-    APPEND("zencube_memory_rss_bytes %.0f\n", metrics->rss_bytes);
+    APPEND_STR("# HELP zencube_memory_rss_bytes RSS memory in bytes\n");
+    APPEND_STR("# TYPE zencube_memory_rss_bytes gauge\n");
+    APPEND_FMT("zencube_memory_rss_bytes %.0f\n", metrics->rss_bytes);
     
-    APPEND("# HELP zencube_memory_vms_bytes VMS memory in bytes\n");
-    APPEND("# TYPE zencube_memory_vms_bytes gauge\n");
-    APPEND("zencube_memory_vms_bytes %.0f\n", metrics->vms_bytes);
+    APPEND_STR("# HELP zencube_memory_vms_bytes VMS memory in bytes\n");
+    APPEND_STR("# TYPE zencube_memory_vms_bytes gauge\n");
+    APPEND_FMT("zencube_memory_vms_bytes %.0f\n", metrics->vms_bytes);
     
-    APPEND("# HELP zencube_threads Thread count\n");
-    APPEND("# TYPE zencube_threads gauge\n");
-    APPEND("zencube_threads %.0f\n", metrics->threads);
+    APPEND_STR("# HELP zencube_threads Thread count\n");
+    APPEND_STR("# TYPE zencube_threads gauge\n");
+    APPEND_FMT("zencube_threads %.0f\n", metrics->threads);
     
-    APPEND("# HELP zencube_fds_open Open file descriptors\n");
-    APPEND("# TYPE zencube_fds_open gauge\n");
-    APPEND("zencube_fds_open %.0f\n", metrics->fds_open);
+    APPEND_STR("# HELP zencube_fds_open Open file descriptors\n");
+    APPEND_STR("# TYPE zencube_fds_open gauge\n");
+    APPEND_FMT("zencube_fds_open %.0f\n", metrics->fds_open);
     
-    APPEND("# HELP zencube_io_read_bytes_total Cumulative read bytes\n");
-    APPEND("# TYPE zencube_io_read_bytes_total counter\n");
-    APPEND("zencube_io_read_bytes_total %.0f\n", metrics->read_bytes);
+    APPEND_STR("# HELP zencube_io_read_bytes_total Cumulative read bytes\n");
+    APPEND_STR("# TYPE zencube_io_read_bytes_total counter\n");
+    APPEND_FMT("zencube_io_read_bytes_total %.0f\n", metrics->read_bytes);
     
-    APPEND("# HELP zencube_io_write_bytes_total Cumulative write bytes\n");
-    APPEND("# TYPE zencube_io_write_bytes_total counter\n");
-    APPEND("zencube_io_write_bytes_total %.0f\n", metrics->write_bytes);
+    APPEND_STR("# HELP zencube_io_write_bytes_total Cumulative write bytes\n");
+    APPEND_STR("# TYPE zencube_io_write_bytes_total counter\n");
+    APPEND_FMT("zencube_io_write_bytes_total %.0f\n", metrics->write_bytes);
     
-    APPEND("# HELP zencube_cpu_max_percent Maximum CPU percentage observed\n");
-    APPEND("# TYPE zencube_cpu_max_percent gauge\n");
-    APPEND("zencube_cpu_max_percent %.2f\n", metrics->cpu_max);
+    APPEND_STR("# HELP zencube_cpu_max_percent Maximum CPU percentage observed\n");
+    APPEND_STR("# TYPE zencube_cpu_max_percent gauge\n");
+    APPEND_FMT("zencube_cpu_max_percent %.2f\n", metrics->cpu_max);
     
-    APPEND("# HELP zencube_memory_rss_max_bytes Maximum RSS observed\n");
-    APPEND("# TYPE zencube_memory_rss_max_bytes gauge\n");
-    APPEND("zencube_memory_rss_max_bytes %.0f\n", metrics->rss_max);
+    APPEND_STR("# HELP zencube_memory_rss_max_bytes Maximum RSS observed\n");
+    APPEND_STR("# TYPE zencube_memory_rss_max_bytes gauge\n");
+    APPEND_FMT("zencube_memory_rss_max_bytes %.0f\n", metrics->rss_max);
     
-    #undef APPEND
+    #undef APPEND_STR
+    #undef APPEND_FMT
     
     return buffer;
 }

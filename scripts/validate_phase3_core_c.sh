@@ -72,7 +72,8 @@ fi
 # Test 5: Code Quality (10 points)
 echo ""
 echo "[5/10] Checking Code Quality..."
-WARNINGS=$(make clean > /dev/null 2>&1 && make all 2>&1 | grep -c "warning:" || echo "0")
+WARNINGS=$(cd "${CORE_DIR}" && make clean > /dev/null 2>&1 && make all 2>&1 | grep -c "warning:" || echo "0")
+WARNINGS=$(echo "$WARNINGS" | tail -1)  # Get only the last line (the count)
 if [[ ${WARNINGS} -eq 0 ]]; then
     echo -e "${GREEN}✓ No compiler warnings${NC}"
     TOTAL_SCORE=$((TOTAL_SCORE + 10))

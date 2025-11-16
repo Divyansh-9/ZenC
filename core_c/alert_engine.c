@@ -39,8 +39,8 @@ int alert_engine_load_rules(AlertEngine *engine, const char *config_path) {
     fseek(fp, 0, SEEK_SET);
     
     char *content = malloc(size + 1);
-    fread(content, 1, size, fp);
-    content[size] = '\0';
+    size_t bytes_read = fread(content, 1, size, fp);
+    content[bytes_read] = '\0';  // Use actual bytes read for safety
     fclose(fp);
     
     cJSON *root = cJSON_Parse(content);
@@ -129,7 +129,9 @@ int alert_engine_evaluate(AlertEngine *engine, const char *log_path, const char 
                         snprintf(alert.alert_id, sizeof(alert.alert_id), 
                                 "alert_%ld_%s", time(NULL), rule->metric);
                         strncpy(alert.metric, rule->metric, sizeof(alert.metric) - 1);
+                        alert.metric[sizeof(alert.metric) - 1] = '\0';  // Ensure null termination
                         strncpy(alert.run_id, run_id, sizeof(alert.run_id) - 1);
+                        alert.run_id[sizeof(alert.run_id) - 1] = '\0';  // Ensure null termination
                         get_iso_timestamp(alert.triggered_at, sizeof(alert.triggered_at));
                         alert.value = value;
                         alert.threshold = rule->threshold;

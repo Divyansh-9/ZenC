@@ -133,11 +133,11 @@ int rotate_logs(const char *log_dir, const char *pattern, int keep_count, int co
     // Delete or compress old files
     int to_remove = file_count - keep_count;
     for (int i = 0; i < to_remove; i++) {
-        char full_path[1024];
+        char full_path[2048];  // Increased buffer to avoid truncation warnings
         snprintf(full_path, sizeof(full_path), "%s/%s", log_dir, files[i]);
         
         if (compress_old) {
-            char gz_path[1024];
+            char gz_path[2560];  // Extra space for .gz suffix to avoid truncation
             snprintf(gz_path, sizeof(gz_path), "%s%s", full_path, GZ_SUFFIX);
             
             if (compress_file(full_path, gz_path) == 0) {

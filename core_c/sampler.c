@@ -278,6 +278,7 @@ int sampler_run(SamplerConfig *config) {
         
         // Set run_id
         strncpy(sample.run_id, config->run_id, sizeof(sample.run_id) - 1);
+        sample.run_id[sizeof(sample.run_id) - 1] = '\0';  // Ensure null termination
         
         // Track maximums
         if (sample.cpu_percent > max_cpu) max_cpu = sample.cpu_percent;
