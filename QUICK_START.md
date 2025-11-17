@@ -1,301 +1,446 @@
-# ZenCube Quick Start Guide
+# ZenCube Desktop - Quick Start Guide
 
-**Version:** Phase-3 Core C Integration  
-**Date:** November 16, 2025  
-**Score:** 10.0/10.0 ⭐
+**Version:** 3.0.0  
+**Last Updated:** November 17, 2025
 
 ---
 
-## 🚀 Quick Start
+## ⚡ 60-Second Quick Start
 
-### Run the Demo
 ```bash
-cd /home/Idred/Downloads/ZenCube
-./demo_zencube.sh
+# 1. Install dependencies
+npm install
+
+# 2. Build C engine
+npm run build:core
+
+# 3. Run the app
+npm run dev
 ```
 
-### Basic Usage
+That's it! The app will launch with hot reload enabled.
+
+---
+
+## 📦 Installation (First Time)
+
+### Prerequisites Check
+
 ```bash
+# Verify Node.js (need 18+)
+node --version
+
+# Verify npm (need 9+)
+npm --version
+
+# Verify GCC compiler
+gcc --version
+
+# Verify Make
+make --version
+```
+
+### Install Steps
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/zencube.git
 cd zencube
 
-# Simple command with monitoring
-./sandbox --enable-core-c echo "Hello, World!"
+# Install Node.js dependencies
+npm install
+# This installs React, Electron, TypeScript, Tailwind, Xterm.js, etc.
 
-# With CPU limit
-./sandbox --enable-core-c --cpu=10 python3 script.py
+# Build C sandbox engine
+npm run build:core
+# This compiles sampler, alertd, prom_exporter binaries
 
-# With memory limit
-./sandbox --enable-core-c --mem=100 ./memory_app
+# Build TypeScript & React
+npm run build
+# Compiles main.ts, preload.ts, and React app
 
-# Multiple limits
-./sandbox --enable-core-c --cpu=5 --mem=256 ./app
+# Start the application
+npm start
 ```
 
 ---
 
-## 📋 Available Commands
+## 🎮 Usage Examples
 
-### Sandbox Options
+### Example 1: Run a Simple Command
+
+1. Launch app: `npm run dev`
+2. Click **"📋 List Files"** quick command
+3. Watch output in terminal
+
+**Expected:**
 ```
---cpu=<seconds>      CPU time limit
---mem=<MB>           Memory limit in megabytes
---procs=<count>      Process limit
---fsize=<MB>         File size limit
---jail=<path>        Chroot jail (requires root)
---no-net             Disable network
---enable-core-c      Enable C monitoring ⭐ NEW
---help               Show help
+$ /bin/ls -la
+total 64
+drwxr-xr-x  8 user user 4096 Nov 17 10:30 .
+drwxr-xr-x 20 user user 4096 Nov 17 10:25 ..
+...
+[Process exited with code: 0]
 ```
 
-### Examples
+### Example 2: Test CPU Limit
+
+1. Set CPU limit to **3 seconds**
+2. Click **"⏱️ CPU Test"** (infinite loop)
+3. Watch process get killed after 3 seconds
+
+**Expected:**
+```
+$ /bin/bash -c while true; do :; done
+[Process terminated with signal: SIGXCPU]
+```
+
+### Example 3: Custom Command
+
+1. Enter path: `/bin/echo`
+2. Enter args: `Hello from ZenCube!`
+3. Click **Execute**
+
+**Expected:**
+```
+$ /bin/echo Hello from ZenCube!
+Hello from ZenCube!
+[Process exited with code: 0]
+```
+
+### Example 4: Use a Preset
+
+1. Click **"Strict"** preset
+2. Notice all limits are configured:
+   - CPU: 5s
+   - Memory: 256MB
+   - Processes: 5
+   - File Size: 100MB
+3. Execute any command with these limits
+
+---
+
+## 🛠️ Development Workflow
+
+### Daily Development
+
 ```bash
-# CPU intensive test
-./sandbox --enable-core-c --cpu=10 python3 -c 'sum(i*i for i in range(10000000))'
+# Start dev mode (rebuilds on file changes)
+npm run dev
 
-# Memory test (allocate 50MB)
-./sandbox --enable-core-c --mem=100 python3 -c 'data = bytearray(50*1024*1024)'
+# Edit files in src/renderer/components/
+# Save → Vite hot reloads → See changes instantly
+```
 
-# Multi-iteration test
-./sandbox --enable-core-c bash -c 'for i in {1..5}; do echo "Test $i"; sleep 1; done'
+### Build for Production
 
-# Backward compatible (no monitoring)
-./sandbox --cpu=10 echo "Legacy mode"
+```bash
+# Full build
+npm run build
+
+# Package for Linux
+npm run package:linux
+
+# Package for Windows
+npm run package:win
+
+# Find packages in:
+ls -lh release/
 ```
 
 ---
 
-## 📊 View Monitoring Data
+## 🎨 Customization
 
-### List Recent Logs
-```bash
-ls -lht monitor/logs/*.jsonl | head -5
-```
+### Change Terminal Colors
 
-### View Latest Log
-```bash
-LATEST=$(ls -t monitor/logs/*.jsonl | head -1)
-cat "$LATEST" | python3 -m json.tool
-```
+Edit `src/renderer/components/Terminal.tsx`:
 
-### Quick Summary
-```bash
-python3 tests/test_jsonl_summary.py
-```
-
-### Parse Stop Event
-```bash
-LATEST=$(ls -t monitor/logs/*.jsonl | head -1)
-tail -1 "$LATEST" | python3 -c "
-import json, sys
-d = json.load(sys.stdin)
-print(f'Samples: {d[\"samples\"]}')
-print(f'Duration: {d[\"duration_seconds\"]:.2f}s')
-print(f'Max CPU: {d[\"max_cpu_percent\"]:.1f}%')
-print(f'Max Memory: {d[\"max_memory_rss\"]/(1024*1024):.1f}MB')
-print(f'Exit Code: {d[\"exit_code\"]}')
-"
-```
-
----
-
-## 🧪 Testing
-
-### Run All Tests
-```bash
-# Core C validation (should score 10.0/10.0)
-bash scripts/validate_phase3_core_c.sh
-
-# GUI JSONL test
-python3 tests/test_jsonl_summary.py
-
-# Integration test
-cd zencube && make test
-```
-
-### Build System
-```bash
-cd zencube
-make clean      # Clean build artifacts
-make sandbox    # Build sandbox
-make all        # Build everything
-```
-
----
-
-## 📈 Monitoring Features
-
-### What Gets Monitored
-- ✅ CPU usage percentage
-- ✅ Memory (RSS and VMS)
-- ✅ Thread count
-- ✅ Open file descriptors
-- ✅ I/O operations (read/write bytes)
-- ✅ Max values tracking
-- ✅ Process exit code
-- ✅ Execution duration
-
-### Sample Format (JSONL)
-```json
-{
-  "event": "sample",
-  "run_id": "jail_run_20251116T083741Z",
-  "timestamp": "2025-11-16T08:37:41Z",
-  "pid": 16836,
-  "cpu_percent": 0.99,
-  "rss_bytes": 3567616,
-  "vms_bytes": 10182656,
-  "threads": 1,
-  "fds_open": 10,
-  "read_bytes": 0,
-  "write_bytes": 0,
-  "cpu_max": 0.99,
-  "rss_max": 3567616
+```typescript
+theme: {
+  background: '#1e1e1e',    // Dark background
+  foreground: '#d4d4d4',    // Light text
+  cursor: '#aeafad',        // Cursor color
+  // ... more colors
 }
 ```
 
-### Stop Event Format
-```json
-{
-  "event": "stop",
-  "timestamp": "2025-11-16T08:37:45Z",
-  "samples": 4,
-  "duration_seconds": 4.097,
-  "max_cpu_percent": 0.99,
-  "max_memory_rss": 3567616,
-  "peak_open_files": 10,
-  "exit_code": 0
+### Add a Quick Command
+
+Edit `src/renderer/components/CommandInput.tsx`:
+
+```typescript
+const QUICK_COMMANDS = [
+  // ... existing commands
+  { label: '🔍 Find Files', command: '/usr/bin/find', args: ['.', '-name', '*.ts'] },
+];
+```
+
+### Add a New Preset
+
+Edit `src/renderer/components/ResourceLimits.tsx`:
+
+```typescript
+const PRESETS = [
+  // ... existing presets
+  { name: 'Ultra', cpu: 60, mem: 2048, proc: 20, fsize: 500 },
+];
+```
+
+### Change Theme Colors
+
+Edit `tailwind.config.js`:
+
+```javascript
+colors: {
+  primary: {
+    500: '#0ea5e9',  // Change to your color
+    600: '#0284c7',
+    700: '#0369a1',
+  },
 }
-```
-
----
-
-## 🎯 Use Cases
-
-### Development Testing
-```bash
-# Test memory usage
-./sandbox --enable-core-c --mem=50 python3 my_app.py
-
-# Test CPU performance
-./sandbox --enable-core-c --cpu=30 ./benchmark.sh
-```
-
-### Resource Profiling
-```bash
-# Profile with monitoring
-./sandbox --enable-core-c --cpu=60 ./long_running_task
-# Check logs for resource usage patterns
-```
-
-### Sandbox Validation
-```bash
-# Ensure app respects limits
-./sandbox --enable-core-c --cpu=10 --mem=100 ./untrusted_app
-# Verify it stops at limits
 ```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### No logs generated?
-- ✅ Check you used `--enable-core-c` flag
-- ✅ Verify `monitor/logs/` directory exists
-- ✅ Check sampler binary exists: `ls core_c/bin/sampler`
+### Issue: "Cannot find module 'electron'"
 
-### Sampler not found?
+**Solution:**
 ```bash
-# Rebuild Core C modules
-cd core_c
-make clean && make all
+rm -rf node_modules package-lock.json
+npm install
 ```
 
-### Check build status
+### Issue: C binaries not found
+
+**Solution:**
 ```bash
 cd core_c
-make clean && make all 2>&1 | grep -c "warning:"
-# Should output: 0
+make clean
+make all
+ls -l bin/  # Verify binaries exist
+chmod +x bin/*  # Ensure executable
 ```
 
----
+### Issue: WSL not working (Windows)
 
-## 📚 Documentation
-
-- `INTEGRATION_COMPLETE.md` - Full integration report
-- `OPTIONAL_IMPROVEMENTS_COMPLETE.md` - Improvements summary
-- `GUI_JSONL_INTEGRATION.md` - GUI integration details
-- `phase3/SCORES.md` - Validation scores
-
----
-
-## ✅ Current Status
-
-| Component | Status | Score |
-|-----------|--------|-------|
-| Core C Implementation | ✅ Complete | 10.0/10.0 |
-| Sandbox Integration | ✅ Working | Perfect |
-| Build System | ✅ Clean | 0 warnings |
-| Memory Safety | ✅ Verified | Valgrind clean |
-| GUI Support | ✅ Ready | JSONL compatible |
-| Tests | ✅ Passing | 100% |
-
-**Production Ready:** YES ✅  
-**Validation Score:** 10.0/10.0 ⭐⭐⭐⭐⭐
-
----
-
-## 🎓 Advanced Usage
-
-### Custom Sampling Interval
-Modify `core.c` line where `core_start_sampling()` is called:
-```c
-core_start_sampling(core_monitor, child_pid, 0.5);  // 0.5s interval
-```
-
-### Parse Logs Programmatically
-```python
-import json
-
-with open('monitor/logs/jail_run_xyz.jsonl', 'r') as f:
-    for line in f:
-        data = json.loads(line)
-        if data['event'] == 'sample':
-            print(f"CPU: {data['cpu_percent']:.1f}%")
-```
-
-### Export to CSV
+**Solution:**
 ```bash
-# Convert JSONL to CSV
-python3 -c "
-import json, csv, sys
+# Install WSL2
+wsl --install
 
-with open('monitor/logs/latest.jsonl', 'r') as f:
-    samples = [json.loads(line) for line in f if 'sample' in line]
+# Set WSL2 as default
+wsl --set-default-version 2
 
-with open('samples.csv', 'w', newline='') as out:
-    writer = csv.DictWriter(out, fieldnames=samples[0].keys())
-    writer.writeheader()
-    writer.writerows(samples)
-"
+# Restart computer
+# Then try npm run dev again
 ```
 
----
+### Issue: Port 5173 already in use
 
-## 🌟 Next Steps
-
-1. ✅ Project is running perfectly
-2. ✅ All tests passing (10.0/10.0)
-3. Ready for production deployment
-4. Consider: GUI launch (if PySide6 installed)
-5. Consider: Prometheus integration
-6. Consider: Alert engine setup
-
----
-
-**Enjoy using ZenCube!** 🚀
-
-For questions or issues, check the documentation or run:
+**Solution:**
 ```bash
-./sandbox --help
-bash scripts/validate_phase3_core_c.sh
+# Kill existing Vite server
+pkill -f vite
+
+# Or change port in vite.config.ts
+server: { port: 3000 }
 ```
+
+### Issue: TypeScript errors
+
+**Solution:**
+```bash
+# These are expected until dependencies are installed
+npm install
+
+# If persists, clear build cache
+rm -rf dist node_modules
+npm install
+npm run build
+```
+
+---
+
+## 📚 Project Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `npm install` | Install all dependencies |
+| `npm run build:core` | Build C binaries |
+| `npm run build:main` | Compile main process (TypeScript) |
+| `npm run build:preload` | Compile preload script (TypeScript) |
+| `npm run build:renderer` | Build React app (Vite) |
+| `npm run build` | Build everything |
+| `npm run dev` | Development mode with hot reload |
+| `npm start` | Run production build |
+| `npm run package` | Package for all platforms |
+| `npm run package:linux` | Package for Linux only |
+| `npm run package:win` | Package for Windows only |
+| `npm run clean` | Remove all build artifacts |
+
+---
+
+## 📂 Important Files
+
+| File | Purpose |
+|------|---------|
+| `src/main/main.ts` | Electron main process (spawn C binary) |
+| `src/preload/preload.ts` | IPC bridge (security) |
+| `src/renderer/App.tsx` | Main React app |
+| `src/renderer/components/Terminal.tsx` | Terminal component |
+| `core_c/Makefile` | C engine build system |
+| `package.json` | Dependencies & scripts |
+| `electron-builder.yml` | Packaging configuration |
+| `vite.config.ts` | React bundler config |
+| `tailwind.config.js` | CSS framework config |
+
+---
+
+## 🎯 Common Tasks
+
+### Task: Add a new React component
+
+```bash
+# 1. Create file
+touch src/renderer/components/MyComponent.tsx
+
+# 2. Write component
+cat > src/renderer/components/MyComponent.tsx << 'EOF'
+import React from 'react';
+
+interface MyComponentProps {
+  title: string;
+}
+
+const MyComponent: React.FC<MyComponentProps> = ({ title }) => {
+  return (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+      <h2 className="text-lg font-bold">{title}</h2>
+    </div>
+  );
+};
+
+export default MyComponent;
+EOF
+
+# 3. Import in App.tsx
+# Add: import MyComponent from './components/MyComponent';
+# Use: <MyComponent title="Hello" />
+
+# 4. See changes (if dev mode running)
+# Changes appear instantly!
+```
+
+### Task: Change app window size
+
+Edit `src/main/main.ts`:
+
+```typescript
+mainWindow = new BrowserWindow({
+  width: 1600,   // Change from 1400
+  height: 1000,  // Change from 900
+  // ...
+});
+```
+
+### Task: Debug the app
+
+```bash
+# Development mode includes DevTools
+npm run dev
+
+# In app window:
+# Press F12 or Ctrl+Shift+I to open DevTools
+```
+
+---
+
+## 🚀 Production Deployment
+
+### Build Distribution Packages
+
+```bash
+# 1. Clean build
+npm run clean
+npm install
+npm run build
+
+# 2. Package for Linux
+npm run package:linux
+
+# Output:
+# release/ZenCube-3.0.0.AppImage        (portable)
+# release/zencube_3.0.0_amd64.deb       (Debian/Ubuntu)
+# release/ZenCube-3.0.0.tar.gz          (generic)
+
+# 3. Package for Windows (on Windows machine with WSL)
+npm run package:win
+
+# Output:
+# release/ZenCube-Setup-3.0.0.exe      (installer)
+# release/ZenCube-3.0.0-win.zip        (portable)
+```
+
+### Test the Package
+
+```bash
+# Linux AppImage
+chmod +x release/ZenCube-3.0.0.AppImage
+./release/ZenCube-3.0.0.AppImage
+
+# Debian/Ubuntu
+sudo dpkg -i release/zencube_3.0.0_amd64.deb
+zencube
+
+# Portable
+tar -xzf release/ZenCube-3.0.0.tar.gz
+cd ZenCube-3.0.0
+./ZenCube
+```
+
+---
+
+## 💡 Pro Tips
+
+1. **Use Quick Commands** - Fastest way to test functionality
+2. **Try Presets First** - Before custom limits
+3. **Watch Terminal Colors** - Green = success, Red = error
+4. **Use Dark Mode** - Easier on eyes for long sessions
+5. **Stop Long Processes** - Red stop button always available
+6. **Check Core Binaries** - Run `ls -l core_c/bin/` to verify
+7. **Dev Mode for Testing** - Hot reload saves time
+8. **Build Mode for Performance** - Optimize before packaging
+
+---
+
+## 📞 Getting Help
+
+- **Documentation:** See `README.md` and `MIGRATION_SUMMARY.md`
+- **C Engine Docs:** See `core_c/README.md`
+- **Project Docs:** See `docs/` directory
+- **Issues:** https://github.com/your-org/zencube/issues
+
+---
+
+## ✅ Verification Checklist
+
+Before considering setup complete:
+
+- [ ] `node --version` shows 18+
+- [ ] `npm install` completes without errors
+- [ ] `npm run build:core` creates `core_c/bin/sampler`
+- [ ] `npm run dev` launches app window
+- [ ] Quick commands execute successfully
+- [ ] Terminal shows colored output
+- [ ] Dark mode toggle works
+- [ ] Stop button terminates processes
+- [ ] Resource limit presets apply correctly
+
+---
+
+**🧊 You're ready to use ZenCube Desktop!**
+
+For questions, check `README.md` or open an issue.

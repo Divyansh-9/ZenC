@@ -1,0 +1,79 @@
+{
+  "name": "zencube-desktop",
+  "version": "3.0.0",
+  "description": "Cross-platform desktop application for process sandboxing and resource control",
+  "main": "dist/main/main.js",
+  "author": "ZenCube Team",
+  "license": "MIT",
+  "scripts": {
+    "build:core": "cd core_c && make clean && make all",
+    "build:tests": "cd ui_test_programs && make all",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:preload": "tsc -p tsconfig.preload.json",
+    "build:renderer": "vite build",
+    "build": "npm run build:core && npm run build:tests && npm run build:main && npm run build:preload && npm run build:renderer",
+    "dev:renderer": "vite",
+    "dev:electron": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
+    "dev": "npm run build:core && npm run build:tests && npm run build:main && npm run build:preload && npm run dev:electron",
+    "start": "electron .",
+    "package:linux": "npm run build && electron-builder --linux",
+    "package:win": "npm run build && electron-builder --win",
+    "package": "npm run build && electron-builder --linux --win",
+    "clean": "rm -rf dist node_modules core_c/bin core_c/*.o"
+  },
+  "dependencies": {
+    "@xterm/xterm": "^5.5.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.554.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^3.4.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
+    "electron": "^28.1.3",
+    "electron-builder": "^24.9.1",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.zencube.desktop",
+    "productName": "ZenCube",
+    "files": [
+      "dist/**/*",
+      "core_c/bin/**/*",
+      "ui_test_programs/bin/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "Development",
+      "icon": "resources/icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "resources/icon.ico"
+    }
+  }
+}

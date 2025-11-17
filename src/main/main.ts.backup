@@ -1,0 +1,214 @@
+import { app, BrowserWindow, ipcMain } from 'electron';
+import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import * as path from 'path';
+import * as process from 'process';
+
+let mainWindow: BrowserWindow | null = null;
+let sandboxProcess: ChildProcessWithoutNullStreams | null = null;
+
+/**
+ * Create the main application window
+ */
+function createWindow(): void {
+  mainWindow = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    minWidth: 1000,
+    minHeight: 700,
+    webPreferences: {
+      preload: path.join(__dirname, '../preload/preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+    },
+    titleBarStyle: 'default',
+    icon: path.join(__dirname, '../../resources/icon.png'),
+  });
+
+  // Load the app
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+/**
+ * Determine if running on Windows
+ */
+function isWindows(): boolean {
+  return process.platform === 'win32';
+}
+
+/**
+ * Get the path to the sandbox binary
+ */
+function getSandboxPath(): string {
+  // In production, the binary is in core_c/bin/
+  // In development, it's in the same location
+  const binaryName = 'sampler'; // or 'sandbox' depending on what you want to execute
+  return path.join(app.getAppPath(), 'core_c', 'bin', binaryName);
+}
+
+/**
+ * Execute the C sandbox binary with platform awareness
+ */
+ipcMain.handle('execute-sandbox', async (event, options: {
+  command: string;
+  args: string[];
+  cpuLimit?: number;
+  memLimit?: number;
+  procLimit?: number;
+  fileSizeLimit?: number;
+}) => {
+  try {
+    // Stop any existing process
+    if (sandboxProcess) {
+      sandboxProcess.kill();
+      sandboxProcess = null;
+    }
+
+    const sandboxPath = getSandboxPath();
+    const commandArgs: string[] = [];
+
+    // Build resource limit arguments
+    if (options.cpuLimit !== undefined) {
+      commandArgs.push(`--cpu=${options.cpuLimit}`);
+    }
+    if (options.memLimit !== undefined) {
+      commandArgs.push(`--mem=${options.memLimit}`);
+    }
+    if (options.procLimit !== undefined) {
+      commandArgs.push(`--procs=${options.procLimit}`);
+    }
+    if (options.fileSizeLimit !== undefined) {
+      commandArgs.push(`--fsize=${options.fileSizeLimit}`);
+    }
+
+    // Add the command and its arguments
+    commandArgs.push(options.command);
+    commandArgs.push(...options.args);
+
+    let spawnCommand: string;
+    let spawnArgs: string[];
+
+    // Platform-aware execution
+    if (isWindows()) {
+      // On Windows, use WSL to execute the Linux binary
+      spawnCommand = 'wsl';
+      spawnArgs = [sandboxPath, ...commandArgs];
+    } else {
+      // On Linux, execute directly
+      spawnCommand = sandboxPath;
+      spawnArgs = commandArgs;
+    }
+
+    // Spawn the process
+    sandboxProcess = spawn(spawnCommand, spawnArgs, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: false,
+    });
+
+    // Stream stdout to renderer
+    sandboxProcess.stdout.on('data', (data: Buffer) => {
+      if (mainWindow) {
+        mainWindow.webContents.send('sandbox-output', {
+          type: 'stdout',
+          data: data.toString(),
+        });
+      }
+    });
+
+    // Stream stderr to renderer
+    sandboxProcess.stderr.on('data', (data: Buffer) => {
+      if (mainWindow) {
+        mainWindow.webContents.send('sandbox-output', {
+          type: 'stderr',
+          data: data.toString(),
+        });
+      }
+    });
+
+    // Handle process exit
+    sandboxProcess.on('exit', (code: number | null, signal: string | null) => {
+      if (mainWindow) {
+        mainWindow.webContents.send('sandbox-exit', {
+          code,
+          signal,
+        });
+      }
+      sandboxProcess = null;
+    });
+
+    // Handle process errors
+    sandboxProcess.on('error', (err: Error) => {
+      if (mainWindow) {
+        mainWindow.webContents.send('sandbox-error', {
+          message: err.message,
+        });
+      }
+      sandboxProcess = null;
+    });
+
+    return { success: true, message: 'Sandbox process started' };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+});
+
+/**
+ * Stop the running sandbox process
+ */
+ipcMain.handle('stop-sandbox', async () => {
+  if (sandboxProcess) {
+    sandboxProcess.kill('SIGTERM');
+    sandboxProcess = null;
+    return { success: true, message: 'Sandbox process stopped' };
+  }
+  return { success: false, message: 'No process running' };
+});
+
+/**
+ * Get system information
+ */
+ipcMain.handle('get-system-info', async () => {
+  return {
+    platform: process.platform,
+    isWindows: isWindows(),
+    sandboxPath: getSandboxPath(),
+  };
+});
+
+/**
+ * App lifecycle
+ */
+app.on('ready', () => {
+  createWindow();
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow();
+  }
+});
+
+// Cleanup on quit
+app.on('before-quit', () => {
+  if (sandboxProcess) {
+    sandboxProcess.kill();
+  }
+});

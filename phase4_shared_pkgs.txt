@@ -1,3 +1,0 @@
-# Packages shared with Phase-1/2/3 components
-
-None detected. GUI, monitoring, and sandbox subsystems do not import numpy, pandas, scikit-learn, joblib, or torch. Only textual references remain in docs/MONITORING_DASHBOARD.md (non-runtime).

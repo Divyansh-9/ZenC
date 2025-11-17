@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ZenCube Modern
+GenericName=Sandbox Manager
+Comment=Lightweight sandbox for process isolation and resource control (Modern UI)
+Exec=zencube-modern
+Icon=zencube
+Terminal=false
+Categories=System;Security;Utility;
+Keywords=sandbox;isolation;security;container;resource;limits;
+StartupNotify=true
+StartupWMClass=ZenCubeModern
+
+# Additional metadata
+X-GNOME-FullName=ZenCube Modern - Process Sandbox
+X-GNOME-UsesNotifications=false
