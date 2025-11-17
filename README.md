@@ -1064,8 +1064,9 @@ make
 
 *For issues, questions, or feedback, please open an issue on GitHub or contact the project maintainers.*
 
-**Author**: Kamal Singh Dhami  
-**Repository**: https://github.com/KamalSDhami/ZenCube  
+**Author**:Divyansh Uniyal
+**Repository**: https://github.com/Divyansh-9/ZenC.git 
 **Branch**: dev  
 **Version**: 2.1  
 **Last Updated**: October 13, 2025
+
