@@ -1,0 +1,117 @@
+# =====================================================
+# Node.js
+# =====================================================
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =====================================================
+# Electron Build Artifacts
+# =====================================================
+/dist/
+/release/
+/build/
+/out/
+/electron-builder-cache/
+/electron-builder-debug.yml
+
+# =====================================================
+# C-Core Build Artifacts (from core_c/Makefile)
+# =====================================================
+/core_c/bin/
+/core_c/*.o
+/core_c/*.d
+*.o
+*.a
+*.so
+
+# =====================================================
+# UI Test Program Artifacts (from ui_test_programs/Makefile)
+# =====================================================
+/ui_test_programs/bin/
+/ui_test_programs/*.o
+
+# =====================================================
+# TypeScript Build Info
+# =====================================================
+*.tsbuildinfo
+
+# Generated artifacts and caches (Python - legacy)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments (legacy)
+.venv/
+venv/
+env/
+ENV/
+
+# Local jail outputs and logs
+monitor/logs/
+sandbox_jail/
+sandbox_jail_py_gui/
+
+# Large test files and outputs
+*.dat
+test_output.*
+*.tmp
+*.bak
+*.swp
+*~
+
+# Build artifacts (legacy Python)
+build/ZenCubeModern/
+*.egg-info/
+
+# =====================================================
+# OS & IDE Junk
+# =====================================================
+.DS_Store
+.vscode/
+.idea/
+*.sublime-*
+
+# =====================================================
+# Backup and Archive Files
+# =====================================================
+*.zip
+*.tar.gz
+*.tar.bz2
+*_backup/
+backup_*/
+
+# =====================================================
+# Large ML Model Files (Legacy - Should Never Be Committed)
+# =====================================================
+*.pt
+*.pth
+*.pkl
+*.pickle
+*.h5
+*.onnx
+*.pb
+/models/
+/backup_phase4_archive/
+
+# =====================================================
+# Package Managers (Lock Files - Optional, Uncomment if Needed)
+# =====================================================
+# package-lock.json
+# yarn.lock
+
+# =====================================================
+# Misc Logs
+# =====================================================
+*.log
+
+# Environment variables - never commit
+.env
+.env.local

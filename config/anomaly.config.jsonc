@@ -1,0 +1,20 @@
+// ZenCube Anomaly Detection thresholds
+// Values are intentionally conservative; adjust per workload when needed.
+{
+  "samplingWindowSeconds": 10,
+  "cpuSpikePercent": 85,
+  "memoryLeakGrowthMbPerSample": 10,
+  "memoryLeakMinRssMb": 128,
+  "threadsForkBombThreshold": 50,
+  "threadsGrowthPerSample": 0.5,
+  "openFilesExhaustion": 128,
+  "ioBytesPerSecondThreshold": 1048576,
+  // Whitelist of known benign test binaries (basenames) that should be ignored by ML heuristics
+  "whitelist": [
+    "infinite_loop",
+    "memory_hog",
+    "fork_bomb",
+    "file_writer",
+    "network_test"
+  ]
+}

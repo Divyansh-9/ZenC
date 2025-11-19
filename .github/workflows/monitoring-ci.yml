@@ -1,0 +1,40 @@
+name: Monitoring CI
+
+on:
+  pull_request:
+    branches:
+      - 'feature/**'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run monitor daemon sanity test
+        run: ./tests/test_monitor_daemon.sh
+
+      - name: Run GUI monitoring test (headless)
+        run: xvfb-run -a ./tests/test_gui_monitoring_py.sh
+
+      - name: Run alerting regression
+        run: ./tests/test_alerting.sh
+
+      - name: Run log rotation regression
+        run: ./tests/test_log_rotate.sh
+
+      - name: Run Prometheus exporter smoke test
+        run: ./tests/test_prom_exporter.sh

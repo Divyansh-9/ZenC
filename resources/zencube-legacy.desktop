@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ZenCube Legacy
+GenericName=Sandbox Manager
+Comment=Lightweight sandbox for process isolation and resource control (Legacy UI)
+Exec=zencube-legacy
+Icon=zencube
+Terminal=false
+Categories=System;Security;Utility;
+Keywords=sandbox;isolation;security;container;resource;limits;
+StartupNotify=true
+StartupWMClass=ZenCubeLegacy
+
+# Additional metadata
+X-GNOME-FullName=ZenCube Legacy - Process Sandbox
+X-GNOME-UsesNotifications=false

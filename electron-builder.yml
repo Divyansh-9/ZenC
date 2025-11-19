@@ -1,0 +1,56 @@
+appId: com.zencube.desktop
+productName: ZenCube
+copyright: Copyright © 2025 ZenCube Team
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - core_c/bin/**/*
+  - package.json
+  - "!**/*.ts"
+  - "!src/**/*"
+  - "!node_modules/**/*"
+  - "!*.md"
+  - "!docs/**/*"
+
+linux:
+  target:
+    - AppImage
+    - deb
+    - tar.gz
+  category: Development
+  icon: resources/icon.png
+  maintainer: ZenCube Team
+  synopsis: Process Sandboxing and Resource Control
+  description: >
+    ZenCube is a cross-platform desktop application for process sandboxing
+    and resource control. It provides a modern, intuitive interface for
+    executing processes with configurable CPU, memory, process, and file
+    size limits.
+
+win:
+  target:
+    - nsis
+    - portable
+  icon: resources/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.developer-tools
+  icon: resources/icon.icns
+
+extraResources:
+  - from: core_c/bin
+    to: core_c/bin
+    filter:
+      - "**/*"

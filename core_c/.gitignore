@@ -1,0 +1,23 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Binaries
+bin/
+core_c/bin/
+
+# Test outputs
+*.jsonl
+*.log
+test_*.jsonl
+test_*.log
+
+# Compressed files
+*.gz
+
+# Temporary files
+*.tmp
+.tmp
+*~
